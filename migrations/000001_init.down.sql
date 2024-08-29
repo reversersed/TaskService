@@ -1,3 +1,2 @@
+DROP SEQUENCE IF EXISTS task_id_sequence;
 DROP TABLE IF EXISTS tasks;
-DROP TRIGGER IF EXISTS tasks_time_update;
-DROP FUNCTION IF EXISTS update_task_updated_time;

@@ -1,12 +1,10 @@
-package entities
+package command
 
 import "time"
 
-type Task struct {
+type UpdateTaskCommand struct {
 	Id          int
 	Title       string
 	Description string
 	Due         time.Time
-	Created     time.Time
-	Updated     time.Time
 }

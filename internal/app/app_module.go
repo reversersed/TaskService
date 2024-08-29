@@ -8,13 +8,8 @@ import (
 )
 
 type app struct {
-	router  *gin.Engine
-	cfg     *config.Config
-	handler handler
-	log     *logrus.Logger
-	dbPool  *pgxpool.Pool
-}
-type handler interface {
-	RegisterRoute(*gin.Engine)
-	Close() error
+	router *gin.Engine
+	cfg    *config.Config
+	log    *logrus.Logger
+	dbPool *pgxpool.Pool
 }

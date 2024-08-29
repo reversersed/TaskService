@@ -72,6 +72,23 @@ func NewConnectionPool(cfg *DatabaseConfig, logger logger) (*pgxpool.Pool, error
 	if logger != nil {
 		logger.Info("starting up migration...")
 	}
+	/*
+		version, dirty, err := migrate.Version()
+		if err != nil {
+			logger.Info("can't find any migrations... forcing version 0")
+			err := migrate.Force(0)
+			if err != nil {
+				return nil, fmt.Errorf("error applying null version: %v", err)
+			}
+		}
+		if dirty {
+			logger.Info("dirty is true... forcing previous version")
+			err := migrate.Force(int(version) - 1)
+			if err != nil {
+				return nil, fmt.Errorf("cannot re-force current version %d: %v", version, err)
+			}
+		}*/
+
 	err = migrate.Up()
 	if err != nil && err.Error() != "no change" {
 		return nil, err

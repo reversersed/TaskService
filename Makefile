@@ -19,7 +19,7 @@ install:
 	@$(MAKE) clean
 
 gen:
-	@swag init --parseDependency -d ./internal/endpoint -g ../app/app.go -o ./docs
+	@swag init --parseDependency -d ./internal/interface/api/rest -g ../../../app/app.go -o ./docs
 
 upgrade: clean i
 	@go get -u ./... && go mod tidy

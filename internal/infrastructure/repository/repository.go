@@ -20,7 +20,7 @@ func (r *repository) Create(ctx context.Context, title, description string, due 
 		return entities.Task{}, middleware.InternalError("can't begin transaction: %v", err)
 	}
 
-	row, err := tx.Query(ctx, "INSERT INTO tasks (Title,Description,Due) VALUES ($1,$2,$3)", title, description, due.Format("2006-01-02 15:04:05.0000"))
+	row, err := tx.Query(ctx, "INSERT INTO tasks (Title,Description,Due) VALUES ($1,$2,$3) RETURNING *", title, description, due.Format("2006-01-02 15:04:05.0000"))
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return entities.Task{}, middleware.InternalError("can't query: %v", err)
 	} else if err != nil && errors.Is(err, pgx.ErrNoRows) {
@@ -67,12 +67,12 @@ func (r *repository) Delete(ctx context.Context, id int) error {
 	if err != nil {
 		return middleware.InternalError("can't begin transaction: %v", err)
 	}
-	cmd, err := tx.Exec(ctx, "delete from tasks where Id = $1 limit 1", id)
+	cmd, err := tx.Exec(ctx, "delete from tasks where Id = $1", id)
 	if err != nil {
 		return middleware.InternalError("can't exec: %v", err)
 	}
 	if cmd.RowsAffected() == 0 {
-		return middleware.NotFoundError("no rows deleted: %v", err)
+		return middleware.NotFoundError("no rows deleted")
 	}
 	tx.Commit(ctx)
 	return nil
@@ -90,11 +90,11 @@ func (r *repository) GetAll(ctx context.Context) ([]entities.Task, error) {
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return nil, middleware.InternalError("can't query: %v", err)
 	} else if err != nil && errors.Is(err, pgx.ErrNoRows) {
-		return nil, middleware.NotFoundError("no tasks found: %v", err)
+		return []entities.Task{}, nil
 	}
 	tasks, err := pgx.CollectRows(rows, pgx.RowToStructByName[Task])
 	if err != nil {
-		return nil, middleware.NotFoundError("no tasks found: %v", err)
+		return []entities.Task{}, nil
 	}
 	entites := make([]entities.Task, len(tasks))
 	for i, task := range tasks {

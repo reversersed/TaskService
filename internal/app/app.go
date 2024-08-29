@@ -1,14 +1,22 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	_ "github.com/reversersed/taskservice/docs"
+	"github.com/reversersed/taskservice/internal/application/services"
 	"github.com/reversersed/taskservice/internal/config"
-	"github.com/reversersed/taskservice/internal/repository"
+	"github.com/reversersed/taskservice/internal/infrastructure/repository"
+	"github.com/reversersed/taskservice/internal/interface/api/rest"
 	"github.com/reversersed/taskservice/pkg/logging/logrus"
 	"github.com/reversersed/taskservice/pkg/middleware"
 	"github.com/reversersed/taskservice/pkg/postgres"
 	"github.com/reversersed/taskservice/pkg/shutdown"
+	"github.com/reversersed/taskservice/pkg/validator"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // @title API
@@ -50,10 +58,11 @@ func New() (*app, error) {
 	repository := repository.New(databasePool)
 
 	log.Info("setting up service...")
-	//service := service.New(log, repository)
+	service := services.NewTaskService(repository, log)
 
 	log.Info("setting up endpoint...")
-	//handler = endpoint.New(service, log, validator.New())
+	rest.NewTaskController(router, service, validator.New())
+
 	log.Info("endpoint set up")
 
 	return &app{
@@ -61,20 +70,23 @@ func New() (*app, error) {
 		cfg:    cfg,
 		router: router,
 		dbPool: databasePool,
-		//handler: handler,
 	}, nil
 }
 
 func (a *app) Run() error {
+	if a.cfg.Server.Environment == "debug" {
+		a.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
+	go shutdown.Graceful(a)
 
+	if err := a.router.Run(fmt.Sprintf("%s:%d", a.cfg.Server.Url, a.cfg.Server.Port)); err != nil {
+		return err
+	}
 	go shutdown.Graceful(a)
 	return nil
 }
 
 func (a *app) Close() error {
-	if err := a.handler.Close(); err != nil {
-		return nil
-	}
 	a.dbPool.Close()
 	return nil
 }
