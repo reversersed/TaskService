@@ -27,7 +27,6 @@ services:
     volumes:
       - ./config:/config
       - ./logs:/logs
-      - ./internal/smtp/templates:/templates
       - ./migrations:/migrations
     container_name: service
     image: service

@@ -15,8 +15,6 @@ import (
 	"github.com/jackc/pgx/v5/stdlib"
 )
 
-//go:generate mockgen -source=client.go -destination=mocks/client.go
-
 type logger interface {
 	Info(...any)
 	Infof(string, ...any)
