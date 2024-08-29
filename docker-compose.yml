@@ -29,9 +29,11 @@ services:
       - ./logs:/logs
       - ./migrations:/migrations
     container_name: service
+    environment:
+      - EXPOSED_PORT=${SERVICE_HOST_PORT}
     image: service
     ports:
-      - 9000:9000
+      - ${SERVICE_HOST_PORT}:${SERVICE_HOST_PORT}
     depends_on:
       database:
         condition: service_healthy

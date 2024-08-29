@@ -11,6 +11,6 @@ FROM alpine:latest
 
 COPY --from=builder /usr/local/go/src/service /
 
-EXPOSE 9000
+EXPOSE ${EXPOSED_PORT}
 
 CMD ["/service"]

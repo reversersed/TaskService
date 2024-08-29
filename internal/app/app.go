@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	_ "github.com/reversersed/taskservice/docs"
+	"github.com/reversersed/taskservice/docs"
 	"github.com/reversersed/taskservice/internal/application/services"
 	"github.com/reversersed/taskservice/internal/config"
 	"github.com/reversersed/taskservice/internal/infrastructure/repository"
@@ -75,6 +75,11 @@ func New() (*app, error) {
 
 func (a *app) Run() error {
 	if a.cfg.Server.Environment == "debug" {
+		if a.cfg.Server.Url == "0.0.0.0" || a.cfg.Server.Url == "localhost" || a.cfg.Server.Url == "127.0.0.1" || a.cfg.Server.Url == "host.docker.internal" {
+			docs.SwaggerInfo.Host = fmt.Sprintf("localhost:%d", a.cfg.Server.Port)
+		} else {
+			docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", a.cfg.Server.Url, a.cfg.Server.Port)
+		}
 		a.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 	go shutdown.Graceful(a)
